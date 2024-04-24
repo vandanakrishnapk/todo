@@ -28,6 +28,7 @@ Route::middleware('auth:sanctum')->group(function()
     Route::get('view_task',[HomeController::class,'view_task']);
     Route::post('update_task/{taskId}',[HomeController::class,'update_task']);
     Route::post('delete_task/{taskId}',[HomeController::class,'delete_task']);
+    Route::get('select/{taskId}',[HomeController::class,'select']);
 });
 Route::post('login',[HomeController::class,'login']);
 Route::post('create_user',[HomeController::class,'create_user']);

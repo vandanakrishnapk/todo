@@ -151,5 +151,13 @@ return response()->json([
 ]);
 }
 
+public function select($taskId)
+{
+    $id =Task::find($taskId);
+    $hh = $id->task_id;
+    $task=Task::where('task_id','=',$hh)->first();
+    return response()->json($task);
+}
+
 
 }
