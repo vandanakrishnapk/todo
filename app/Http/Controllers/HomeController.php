@@ -15,12 +15,16 @@ class HomeController extends Controller
             'name' =>'required',
             'email' =>'required',
             'password' =>'required',
+            'image'=> 'mimes:jpeg,jpg,png,gif|max:2048', 
         ]);
-        $user =User::create([
-            'name' =>$request->name,
-            'email' =>$request->email,
-            'password' =>bcrypt($request->password),
-        ]);
+        $data = $request->all();
+        $path = 'asset/storage/images/'.$data['image'];
+        $fileName=time().$request->file('image')->getClientoriginalName();
+        $path=$request->file('image')->storeAs('images',$fileName,'public');
+        $datas["image"]='/storage/'.$path;        
+        $data['image']=$fileName; 
+        $data['password']=bcrypt($request->password);
+       $user =  User::create($data);
         return response()->json([
             'status' =>'true',
             'message' =>'user created successfully',
@@ -59,6 +63,7 @@ class HomeController extends Controller
          public function profile_view()
          {
             $user = Auth::user();
+            return $user;
             return response()->json([
                 'status' =>true,
                 'user' => $user,
@@ -96,5 +101,55 @@ public function add_task(Request $request)
     
     ],200);
 }
+public function view_task()
+{
+    $task =Task::all();
+    return response()->json($task);
+}
+
+
+public function update_task(Request $request, $taskId)
+{
+    $request->validate([
+        'title' => 'required|string',
+        'description' => 'required|string',
+        'date' => 'required|date',
+    ]);
+
+    // Find the task by ID
+    $task = Task::find($taskId);
+
+    // Check if the task exists
+    if (!$task) {
+        return response()->json([
+            'status' => false,
+            'message' => 'Task not found',
+        ], 404);
+    }
+
+    // Update task attributes
+    $task->title = $request->title;
+    $task->description = $request->description;
+    $task->date = $request->date;
+
+    // Save the updated task
+    $task->update();
+
+    return response()->json([
+        'status' => true,
+        'message' => 'Task updated successfully',
+        'task' => $task, // Optionally, you can return the updated task data
+    ], 200);
+}
+
+public function delete_task($taskId)
+{
+$task =Task::find($taskId)->delete();
+return response()->json([
+    'status' =>true,
+    'message' =>'task deleted successfully',
+]);
+}
+
 
 }
