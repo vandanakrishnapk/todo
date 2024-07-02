@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Task;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 class HomeController extends Controller
 {
     public function create_user(Request $request)
@@ -30,8 +32,7 @@ class HomeController extends Controller
             'message' =>'user created successfully',
             'token' =>$user->createToken("API TOKEN")->plainTextToken],200);
         
-    
-}
+    }
         public function view_user()
         {
             $user = User::all();
@@ -62,8 +63,7 @@ class HomeController extends Controller
          }
          public function profile_view()
          {
-            $user = Auth::user();
-            return $user;
+            $user = Auth::user();                   
             return response()->json([
                 'status' =>true,
                 'user' => $user,
@@ -87,7 +87,9 @@ public function add_task(Request $request)
         'title' =>'required|string',
         'description' =>'required|string',
         'date' =>'required|date',
+        'user_id'=>'required',
     ]);
+   
     $user = $request->user();
     Task::create([
         'user_id' =>$user->id,
@@ -103,7 +105,13 @@ public function add_task(Request $request)
 }
 public function view_task()
 {
-    $task =Task::all();
+    $user =Auth::user();
+
+
+    $id=$user->id;
+    
+
+    $task = Task::where('user_id','=',$id)->get();
     return response()->json($task);
 }
 
@@ -159,5 +167,13 @@ public function select($taskId)
     return response()->json($task);
 }
 
+public function view_tasks()
+{
+    $tasks = DB::table('users')
+    ->join('tasks', 'users.id', '=', 'tasks.user_id')   
+    ->select('users.name','tasks.*')
+    ->get();
+    return response()->json($tasks);
+}
 
 }
